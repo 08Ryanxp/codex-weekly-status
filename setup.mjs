@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { createInterface } from 'node:readline';
 import { fileURLToPath } from 'node:url';
 
-const ITEM = 'weekly-limit';
+const ITEMS = ['five-hour-limit', 'weekly-limit'];
 const DEFAULT_ITEMS = ['model-with-reasoning', 'current-dir', 'thread-name'];
 
 export async function configure(request, remove = false) {
@@ -18,13 +18,17 @@ export async function configure(request, remove = false) {
   if (!Array.isArray(current) || current.some(item => typeof item !== 'string')) {
     throw new Error('tui.status_line precisa ser uma lista de textos. Nenhuma alteração foi feita.');
   }
-  if (current.includes(ITEM) !== remove) {
+  const missing = ITEMS.filter(item => !current.includes(item));
+  if (remove ? missing.length === ITEMS.length : missing.length === 0) {
     return { changed: false, file: layer.name.file, items: current };
   }
-  const items = remove ? current.filter(item => item !== ITEM) : [...current];
+  const items = remove ? current.filter(item => !ITEMS.includes(item)) : [...current];
   if (!remove) {
+    const weeklyIndex = items.indexOf('weekly-limit');
+    const fiveHourIndex = items.indexOf('five-hour-limit');
     const modelIndex = items.findIndex(item => ['model-with-reasoning', 'model', 'model-name'].includes(item));
-    items.splice(modelIndex + 1, 0, ITEM);
+    const insertAt = weeklyIndex >= 0 ? weeklyIndex : fiveHourIndex >= 0 ? fiveHourIndex + 1 : modelIndex + 1;
+    items.splice(insertAt, 0, ...missing);
   }
   const result = await request('config/batchWrite', {
     edits: [{ keyPath: 'tui.status_line', value: items, mergeStrategy: 'replace' }],
@@ -91,8 +95,8 @@ async function main() {
     child.stdin.write(JSON.stringify({ method: 'initialized', params: {} }) + '\n');
     const result = await configure(request, remove);
     console.log(result.changed
-      ? `Indicador semanal ${remove ? 'removido' : 'ativado'}.`
-      : `Indicador semanal já ${remove ? 'estava ausente' : 'está ativado'}. Nenhuma alteração.`);
+      ? `Indicadores de limite ${remove ? 'removidos' : 'ativados'}.`
+      : `Os indicadores já ${remove ? 'estavam ausentes' : 'estão ativados'}. Nenhuma alteração.`);
     console.log(`Arquivo: ${result.file}`);
     console.log(`Rodapé: ${result.items.join(' · ') || '(vazio)'}`);
     if (result.changed) console.log('Reabra o Codex; para retomar uma conversa, use codex resume.');
