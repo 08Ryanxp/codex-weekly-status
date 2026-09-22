@@ -29,7 +29,16 @@ Close and reopen Codex to see the indicator. To continue an existing conversatio
 
 Your other settings are preserved.
 
-**Already installed?** From the project folder, run `git pull`, then `node setup.mjs` to update.
+## Update
+
+Updates are not automatic. Open a terminal in the `codex-weekly-status` folder and run:
+
+```sh
+git pull
+node setup.mjs
+```
+
+The first command downloads the new version; the second applies the settings. Close and reopen Codex to see the change.
 
 ## Remove
 

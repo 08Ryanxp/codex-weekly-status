@@ -29,7 +29,16 @@ Feche e abra o Codex para ver o indicador. Para continuar uma conversa existente
 
 Suas outras configurações são preservadas.
 
-**Já instalou antes?** Na pasta do projeto, execute `git pull` e depois `node setup.mjs` para atualizar.
+## Atualizar
+
+As atualizações não são automáticas. Abra o terminal na pasta `codex-weekly-status` e execute:
+
+```sh
+git pull
+node setup.mjs
+```
+
+O primeiro comando baixa a versão nova; o segundo aplica a configuração. Feche e abra o Codex para ver a mudança.
 
 ## Remover
 
